@@ -143,11 +143,95 @@ require('lazy').setup({
   },
 
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    'jose-elias-alvarez/null-ls.nvim',
+    ft = 'go',
+    config = function()
+      local null_ls = require('null-ls')
+      local formatting = null_ls.builtins.formatting
+      local diagnostics = null_ls.builtins.diagnostics
+      local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
+
+      null_ls.setup {
+        sources = {
+          formatting.gofumpt,
+          formatting.goimports,
+          diagnostics.golangci_lint,
+        },
+        on_attach = function(client, bufnr)
+          if client.supports_method('textDocument/formatting') then
+            vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ bufnr = bufnr })
+              end,
+            })
+          end
+	      end,
+      }
+    end,
+  },
+
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'onedark'
+      vim.cmd.colorscheme 'catppuccin'
+    end,
+  },
+
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    opts = {},
+  },
+  
+  {
+    'zbirenbaum/copilot.lua',
+    enabled = true,
+    cmd = 'Copilot',
+    event = 'InsertEnter',
+    config = function()
+      require('copilot').setup({
+        panel = {
+          enabled = true,
+          auto_refresh = true,
+          keymap = {
+            jump_next = '<c-j>',
+            jump_prev = '<c-k>',
+            accept = '<c-a>',
+            refresh = 'r',
+            open = '<M-CR>',
+          },
+          layout = {
+            position = 'bottom', -- | top | left | right
+            ratio = 0.4,
+          },
+        },
+        suggestion = {
+          enabled = true,
+          auto_trigger = true,
+          debounce = 75,
+          keymap = {
+            accept = '<c-a>',
+            accept_word = false,
+            accept_line = false,
+            next = '<c-j>',
+            prev = '<c-k>',
+            dismiss = '<C-e>',
+          },
+        },
+      })
+    end,
+  },
+  
+  {
+    'zbirenbaum/copilot-cmp',
+    after = {},
+    config = function()
+      require('copilot_cmp').setup()
     end,
   },
 
@@ -225,6 +309,10 @@ require('lazy').setup({
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
+
+vim.o.relativenumber = true
+vim.o.number = true
+vim.o.cursorline = true
 
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -460,7 +548,15 @@ require('which-key').register({
 --  define the property 'filetypes' to the map in question.
 local servers = {
   -- clangd = {},
-  -- gopls = {},
+  gopls = {
+    analyses = {
+      unusedparams = true,
+    },
+    staticcheck = true,
+    gofumpt = true,
+    completeUnimported = true,
+    usePlaceholders = true,
+  },
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
