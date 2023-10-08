@@ -154,6 +154,7 @@ require('lazy').setup({
       null_ls.setup {
         sources = {
           formatting.gofumpt,
+          formatting.stylua,
           formatting.goimports,
           diagnostics.golangci_lint,
         },
@@ -187,7 +188,7 @@ require('lazy').setup({
     event = 'InsertEnter',
     opts = {},
   },
-  
+
   {
     'zbirenbaum/copilot.lua',
     enabled = true,
@@ -226,7 +227,7 @@ require('lazy').setup({
       })
     end,
   },
-  
+
   {
     'zbirenbaum/copilot-cmp',
     after = {},
@@ -303,13 +304,14 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
+require 'custom.keymaps'
 vim.o.relativenumber = true
 vim.o.number = true
 vim.o.cursorline = true
